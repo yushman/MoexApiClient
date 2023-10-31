@@ -1,5 +1,4 @@
-# MoexApiClient
-### MOEX ISS Api client
+# MOEX ISS Api client
 
 **Currently in progress....**
 
