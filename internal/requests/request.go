@@ -10,46 +10,46 @@ const (
 	HTML ResultType = 3
 )
 
-type request struct {
+type Request struct {
 	IEndpoint
 	IParam
 }
 
 type ResultType int
 
-func New() *request {
-	return &request{
+func New() *Request {
+	return &Request{
 		nil,
-		&Param{make(map[string] string)},
+		&Param{make(map[string]string)},
 	}
 }
 
-func (r *request) Execute() (*http.Response, error) {
+func (r *Request) Execute() (*http.Response, error) {
 	return http.Get(r.GetUrl())
 }
 
-func (r *request) ExexuteWithType(rt ResultType) (*http.Response, error) {
+func (r *Request) ExexuteWithType(rt ResultType) (*http.Response, error) {
 	return http.Get(r.GetUrlWithType(rt))
 }
 
-func (r *request) GetUrl() string {
+func (r *Request) GetUrl() string {
 	return base + r.IEndpoint.MakeUrl() + JSON.String() + r.IParam.Get()
 }
 
-func (r *request) GetUrlWithType(rt ResultType) string {
+func (r *Request) GetUrlWithType(rt ResultType) string {
 	return base + r.IEndpoint.MakeUrl() + rt.String() + r.IParam.Get()
 }
 
-func (r *request) AddQueryParam(q string) IParam {
+func (r *Request) AddQueryParam(q string) IParam {
 	r.IParam.AddParam(Search, q)
 	return r.IParam
 }
 
-func (r *request) AddEndpoint(url string) {
+func (r *Request) AddEndpoint(url string) {
 	r.IEndpoint = r.IEndpoint.addUrl(url)
 }
 
-func (r *request) NewSecurities() IEndpoint {
+func (r *Request) NewSecurities() IEndpoint {
 	r.IEndpoint = &Endpoint{
 		url: Securities,
 		end: r.getReqSafe(),
@@ -57,7 +57,33 @@ func (r *request) NewSecurities() IEndpoint {
 	return r.IEndpoint
 }
 
-func (r *request) NewHistory() IEndpoint {
+func (r *Request) NewSecurity(s string) IEndpoint {
+	r.IEndpoint = &Endpoint{
+		url: Securities,
+		end: r.getReqSafe(),
+	}
+	r.AddEndpoint(s)
+	return r.IEndpoint
+}
+
+func (r *Request) NewEngines() IEndpoint {
+	r.IEndpoint = &Endpoint{
+		url: Engines,
+		end: r.getReqSafe(),
+	}
+	return r.IEndpoint
+}
+
+func (r *Request) NewEngine(s string) IEndpoint {
+	r.IEndpoint = &Endpoint{
+		url: Engines,
+		end: r.getReqSafe(),
+	}
+	r.AddEndpoint(s)
+	return r.IEndpoint
+}
+
+func (r *Request) NewHistory() IEndpoint {
 	r.IEndpoint = &Endpoint{
 		url: History,
 		end: r.getReqSafe(),
@@ -65,7 +91,7 @@ func (r *request) NewHistory() IEndpoint {
 	return r.IEndpoint
 }
 
-func (r *request) NewMarkets() IEndpoint {
+func (r *Request) NewMarkets() IEndpoint {
 	r.IEndpoint = &Endpoint{
 		url: Markets,
 		end: r.getReqSafe(),
@@ -73,7 +99,16 @@ func (r *request) NewMarkets() IEndpoint {
 	return r.IEndpoint
 }
 
-func (r *request) NewSecurityGroups() IEndpoint {
+func (r *Request) NewMarket(s string) IEndpoint {
+	r.IEndpoint = &Endpoint{
+		url: Markets,
+		end: r.getReqSafe(),
+	}
+	r.AddEndpoint(s)
+	return r.IEndpoint
+}
+
+func (r *Request) NewSecurityGroups() IEndpoint {
 	r.IEndpoint = &Endpoint{
 		url: Securitygoups,
 		end: r.getReqSafe(),
@@ -81,7 +116,7 @@ func (r *request) NewSecurityGroups() IEndpoint {
 	return r.IEndpoint
 }
 
-func (r *request) NewSecurityTypes() IEndpoint {
+func (r *Request) NewSecurityTypes() IEndpoint {
 	r.IEndpoint = &Endpoint{
 		url: Secutitytypes,
 		end: r.getReqSafe(),
@@ -89,7 +124,7 @@ func (r *request) NewSecurityTypes() IEndpoint {
 	return r.IEndpoint
 }
 
-func (r *request) NewStatistics() IEndpoint {
+func (r *Request) NewStatistics() IEndpoint {
 	r.IEndpoint = &Endpoint{
 		url: Statistics,
 		end: r.getReqSafe(),
@@ -97,7 +132,7 @@ func (r *request) NewStatistics() IEndpoint {
 	return r.IEndpoint
 }
 
-func (r *request) NewSitenews() IEndpoint {
+func (r *Request) NewSitenews() IEndpoint {
 	r.IEndpoint = &Endpoint{
 		url: Sitenews,
 		end: r.getReqSafe(),
@@ -105,7 +140,7 @@ func (r *request) NewSitenews() IEndpoint {
 	return r.IEndpoint
 }
 
-func (r request) getReqSafe() IEndpoint {
+func (r *Request) getReqSafe() IEndpoint {
 	if r.IEndpoint != nil {
 		return r.IEndpoint
 	} else {

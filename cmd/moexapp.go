@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
-	"moexapplication/cmd/requests"
+	"moexapplication/internal/requests"
 	"net/http"
 	"os"
 )
@@ -11,6 +12,7 @@ import (
 func main() {
 
 	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/s", securetiesHandler)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -31,19 +33,89 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, _ := doReq()
-	_, err := fmt.Fprint(w, resp.Proto)
+	resp, _ := doSitenewsReq(r.URL.RawQuery)
+	var b []byte
+	if resp.StatusCode != 200 {
+		w.WriteHeader(resp.StatusCode)
+	}
+	var err error
+	defer resp.Body.Close()
+	b, err = io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	bString := string(b)
+
+	log.Printf(bString[:100])
+	_, err = fmt.Fprintf(w, bString)
+	if err != nil {
+		return
+	}
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
-func doReq() (*http.Response, error) {
+func securetiesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/s" {
+		http.NotFound(w, r)
+		return
+	}
+
+	resp, _ := doSecurityReq(r.URL.RawQuery)
+	var b []byte
+	if resp.StatusCode != 200 {
+		w.WriteHeader(resp.StatusCode)
+	}
+	var err error
+	defer resp.Body.Close()
+	b, err = io.ReadAll(resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	bString := string(b)
+
+	log.Printf(bString[:100])
+	_, err = fmt.Fprintf(w, bString)
+	if err != nil {
+		return
+	}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func doSitenewsReq(q string) (*http.Response, error) {
 	request := requests.New()
 	request.NewSitenews()
-	//request.AddEndpoint("URL")
-	//request.NewSecurities()
-	//request.AddQueryParam("MOEX")
 
-	return request.ExexuteWithType(requests.HTML)
+	log.Printf(q)
+	log.Printf(request.GetUrl())
+
+	return request.ExexuteWithType(getResultType(q))
+}
+
+func doSecurityReq(q string) (*http.Response, error) {
+	request := requests.New()
+	request.NewSecurity("IMOEX")
+
+	log.Printf(q)
+	log.Printf(request.GetUrl())
+
+	return request.ExexuteWithType(getResultType(q))
+}
+
+func getResultType(q string) requests.ResultType {
+	var rt requests.ResultType
+	switch q {
+	case "j":
+		rt = requests.JSON
+	case "h":
+		rt = requests.HTML
+	case "c":
+		rt = requests.CSV
+	default:
+		rt = requests.JSON
+	}
+	return rt
 }

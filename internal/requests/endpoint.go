@@ -8,6 +8,7 @@ const (
 	Secutitytypes = "securitytypes/"
 	Statistics    = "statistics/"
 	Sitenews      = "sitenews/"
+	Engines       = "engines/"
 )
 
 type IEndpoint interface {
