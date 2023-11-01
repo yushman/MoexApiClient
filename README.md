@@ -11,7 +11,7 @@ request := requests.New()
 request.NewEngine("SOME_ENGINE")
 request.NewMarket("SOME_MARKET")
 request.NewSecurity("IMOEX")
-response, err :=	return request.ExexuteWithType(requests.JSON)
+response, err := request.ExexuteWithType(requests.JSON)
 ```
 See moexapp.go for more
 
